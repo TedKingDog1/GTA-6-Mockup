@@ -15,3 +15,9 @@
 .toast{position:absolute;top:28%;left:50%;transform:translate(-50%,-10px);padding:11px 18px;background:#131c1bd9;border:1px solid #d6b66c88;border-radius:3px;font-size:11px;letter-spacing:.5px;opacity:0;transition:opacity .2s,transform .2s}.toast.show{opacity:1;transform:translate(-50%,0)}
 .pause{position:absolute;inset:0;display:grid;place-items:center;background:#07100edb;backdrop-filter:blur(9px);pointer-events:auto}.pause.hidden{display:none}.pause-card{text-align:center;width:min(440px,90vw);padding:48px 35px;background:linear-gradient(145deg,#1c2925,#101816);border:1px solid #d3b16c66;box-shadow:0 25px 80px #0009}.pause-card small{letter-spacing:5px;color:#d9b86e;font-size:10px}.pause-card h1{font:900 64px 'Barlow Condensed';letter-spacing:5px;margin:8px 0}.pause-card p{color:#aeb9ad;font-size:13px;margin-bottom:28px}.pause-card button{width:100%;padding:14px;background:#d2a650;border:0;color:#17201b;font-weight:900;letter-spacing:2px;cursor:pointer}.pause-card button:hover{background:#edc56f}.pause-card div{margin-top:20px;font-size:9px;color:#8c9a8f;line-height:1.7}
 @media(max-width:650px){.brand{left:15px;top:15px}.top-right{right:15px;top:15px}.mission{left:15px;top:80px}.minimap-wrap{left:15px;bottom:15px;transform:scale(.78);transform-origin:bottom left}.help{left:150px;bottom:20px;max-width:calc(100vw - 165px);flex-wrap:wrap;font-size:8px}.speedometer{right:15px;bottom:20px}.speedometer strong{font-size:35px}}
+
+/* Mouse-look state and cleaner presentation for the expanded character rig. */
+.help{transition:opacity .2s,transform .2s}
+.help.mouse-locked{opacity:.42;transform:translateY(3px)}
+canvas{outline:none;cursor:crosshair}
+.pause-card{border-radius:4px}
