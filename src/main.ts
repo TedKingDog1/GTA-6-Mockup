@@ -41,8 +41,9 @@ const boxGeo=new THREE.BoxGeometry(1,1,1);
 function box(x:number,y:number,z:number,sx:number,sy:number,sz:number,m:THREE.Material, parent:THREE.Object3D=scene) {
  const o=new THREE.Mesh(boxGeo,m); o.position.set(x,y,z); o.scale.set(sx,sy,sz); o.castShadow=sy>1.5; o.receiveShadow=true; parent.add(o); return o;
 }
+const cylinderGeo=new THREE.CylinderGeometry(1,1,1,8);
 function cylinder(x:number,y:number,z:number,r:number,h:number,m:THREE.Material,parent:THREE.Object3D=scene) {
- const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,8),m); o.position.set(x,y,z); o.castShadow=true; parent.add(o); return o;
+ const o=new THREE.Mesh(cylinderGeo,m); o.position.set(x,y,z); o.scale.set(r,h,r); o.castShadow=true; parent.add(o); return o;
 }
 const world=new THREE.Group(); scene.add(world);
 box(0,-1.2,0,1200,2,1200,groundMat,world);
@@ -67,6 +68,8 @@ const seed=(n:number)=>{const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math
 let buildingCount=0;
 const buildingColliders:BoxCollider[]=[];
 const buildingMaterials=palettes.map(color=>mat(color));
+const facadeTrimMat=mat(0x5a625d), doorMat=mat(0x263b40,0.35,0.08), signMat=mat(0xd3a75c);
+const rooftopMat=mat(0x626d70), rooftopMetalMat=mat(0x9ba4a0), rooftopCapMat=mat(0x6d7773);
 for(let gx=-5;gx<5;gx++) for(let gz=-5;gz<5;gz++){
  const cx=gx*72+36, cz=gz*72+36;
  for(let j=0;j<4;j++){
@@ -74,14 +77,12 @@ for(let gx=-5;gx<5;gx++) for(let gz=-5;gz<5;gz++){
   const h= (Math.abs(gx)<2&&Math.abs(gz)<2 ? 18+seed(buildingCount+2)*75 : 7+seed(buildingCount+2)*22);
   const w=17+seed(buildingCount+4)*4, d=16+seed(buildingCount+8)*5;
   const paletteIndex=Math.floor(seed(buildingCount+3)*palettes.length);
-  const color=palettes[paletteIndex];
   const building=box(x,h/2,z,w,h,d,buildingMaterials[paletteIndex],world); buildingCount++;
   buildingColliders.push({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});
   // Facade trim, entrance, and signage add visual depth to the street-facing side.
-  const trimMat=mat(0x5a625d), doorMat=mat(0x263b40,0.35,0.08);
-  for(const side of [-1,1]){const pilaster=box(x+side*(w/2-0.22),h/2,z+d/2+0.035,0.22,h,0.09,trimMat,world);pilaster.castShadow=false;}
+  for(const side of [-1,1]){const pilaster=box(x+side*(w/2-0.22),h/2,z+d/2+0.035,0.22,h,0.09,facadeTrimMat,world);pilaster.castShadow=false;}
   box(x,1.0,z+d/2+0.045,Math.min(1.45,w*0.22),1.9,0.08,doorMat,world);
-  if(buildingCount%4===0){const sign=box(x,2.35,z+d/2+0.11,w*0.48,0.42,0.12,mat(0xd3a75c),world);sign.castShadow=false;}
+  if(buildingCount%4===0){const sign=box(x,2.35,z+d/2+0.11,w*0.48,0.42,0.12,signMat,world);sign.castShadow=false;}
   const floors=Math.max(2,Math.floor(h/3.5));
   for(let f=0;f<floors;f++){
    const yy=1.7+f*3.25;
@@ -97,8 +98,8 @@ for(let gx=-5;gx<5;gx++) for(let gz=-5;gz<5;gz++){
     awning.castShadow=true;
    }
   }
-  if(h>35){box(x,h+1,z,w*0.35,1.5,d*0.35,mat(0x626d70),world); cylinder(x+2,h+3,z+1,0.65,3,mat(0x9ba4a0),world);}
-  else {box(x,h+0.4,z,w*0.45,0.8,d*0.4,mat(0x6d7773),world);}
+  if(h>35){box(x,h+1,z,w*0.35,1.5,d*0.35,rooftopMat,world); cylinder(x+2,h+3,z+1,0.65,3,rooftopMetalMat,world);}
+  else {box(x,h+0.4,z,w*0.45,0.8,d*0.4,rooftopCapMat,world);}
  }
 }
 // Parks, palms, streetlights
@@ -241,8 +242,8 @@ function drawMap(pos:THREE.Vector3,angle:number){
  ctx.save();ctx.translate(90,90);ctx.rotate(-angle);ctx.fillStyle='#f4e7a7';ctx.beginPath();ctx.moveTo(0,-8);ctx.lineTo(5,6);ctx.lineTo(0,3);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.restore();
 }
 function drawWorldMap(){
- const w=worldMap.width,h=worldMap.height,sx=w/840,sz=h/900;
- const px=(x:number)=>(x+420)*sx,py=(z:number)=>(z+450)*sz;
+ const w=worldMap.width,h=worldMap.height,sx=w/840,sz=h/1000;
+ const px=(x:number)=>(x+420)*sx,py=(z:number)=>(z+550)*sz;
  worldCtx.clearRect(0,0,w,h);worldCtx.fillStyle='#263b35';worldCtx.fillRect(0,0,w,h);
  worldCtx.fillStyle='#c9b78d';worldCtx.fillRect(0,py(-450),w,py(-398)-py(-450));
  worldCtx.fillStyle='#247d91';worldCtx.fillRect(0,0,w,py(-450));
