@@ -70,8 +70,6 @@ const buildingColliders:BoxCollider[]=[];
 const buildingMaterials=palettes.map(color=>mat(color));
 const facadeTrimMat=mat(0x5a625d), doorMat=mat(0x263b40,0.35,0.08), signMat=mat(0xd3a75c);
 const rooftopMat=mat(0x626d70), rooftopMetalMat=mat(0x9ba4a0), rooftopCapMat=mat(0x6d7773);
-const facadeTrimMat=mat(0x5a625d), doorMat=mat(0x263b40,0.35,0.08), signMat=mat(0xd3a75c);
-const rooftopMat=mat(0x626d70), rooftopMetalMat=mat(0x9ba4a0), rooftopCapMat=mat(0x6d7773);
 for(let gx=-5;gx<5;gx++) for(let gz=-5;gz<5;gz++){
  const cx=gx*72+36, cz=gz*72+36;
  for(let j=0;j<4;j++){
