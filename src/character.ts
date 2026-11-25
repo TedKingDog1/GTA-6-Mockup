@@ -39,8 +39,8 @@ export function createPlayerCharacter(): CharacterRig {
   hairCap.scale.set(0.94,1.12,0.96); hairCap.position.y=0.035; hairCap.castShadow=true; head.add(hairCap);
   const earGeo=new THREE.SphereGeometry(0.055,12,10);
   for(const side of [-1,1]){const ear=new THREE.Mesh(earGeo,skin);ear.position.set(side*0.22,-0.015,0);head.add(ear);}
-  for(const side of [-1,1]){const eyeMesh=new THREE.Mesh(new THREE.SphereGeometry(0.018,10,8),eye);eyeMesh.position.set(side*0.085,0.025,0.207);head.add(eyeMesh);}
-  const nose=new THREE.Mesh(new THREE.SphereGeometry(0.035,10,8),skin);nose.scale.set(0.7,1.2,0.8);nose.position.set(0,-0.045,0.225);head.add(nose);
+  for(const side of [-1,1]){const eyeMesh=new THREE.Mesh(new THREE.SphereGeometry(0.018,10,8),eye);eyeMesh.position.set(side*0.085,0.025,-0.207);head.add(eyeMesh);}
+  const nose=new THREE.Mesh(new THREE.SphereGeometry(0.035,10,8),skin);nose.scale.set(0.7,1.2,0.8);nose.position.set(0,-0.045,-0.225);head.add(nose);
 
   const shoulderPivots:THREE.Group[]=[];
   for(const side of [-1,1]){
