@@ -163,7 +163,7 @@ function notify(message:string){toast.textContent=message;toast.classList.add('s
 let mode:Mode='on-foot',activeCar:Vehicle|null=null,paused=false,dayTime=0.43,elapsed=0;
 const keys=new Set<string>();let yaw=0,mapOpen=false;
 const mapScreen=$<HTMLDivElement>('map-screen');
-addEventListener('keydown',e=>{keys.add(e.code);if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='KeyM'&&!paused){mapOpen=!mapOpen;mapScreen.classList.toggle('hidden',!mapOpen);if(mapOpen)drawWorldMap();}if(e.code==='Escape'){if(mapOpen){mapOpen=false;mapScreen.classList.add('hidden');}else{paused=!paused;$<HTMLDivElement>('pause').classList.toggle('hidden',!paused);}}});
+addEventListener('keydown',e=>{keys.add(e.code);if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='KeyM'&&!e.repeat&&!paused){mapOpen=!mapOpen;mapScreen.classList.toggle('hidden',!mapOpen);if(mapOpen){document.exitPointerLock();drawWorldMap();}}if(e.code==='Escape'&&!e.repeat){if(mapOpen){mapOpen=false;mapScreen.classList.add('hidden');}else{paused=!paused;$<HTMLDivElement>('pause').classList.toggle('hidden',!paused);}}});
 addEventListener('keyup',e=>keys.delete(e.code));
 $('resume').addEventListener('click',()=>{paused=false;$<HTMLDivElement>('pause').classList.add('hidden');renderer.domElement.requestPointerLock();});
 // Pointer lock gives the camera true FPS-style mouse look. Click the game to capture.
