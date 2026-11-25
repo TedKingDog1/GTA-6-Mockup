@@ -30,3 +30,10 @@ Open the forwarded port 5173.
 - Minimap, objective HUD, clock, pause overlay and notifications
 
 This is an original fan-made prototype and is not affiliated with Rockstar Games.
+
+
+### Camera
+Click inside the game viewport to capture the mouse and look around. Press Escape to release the mouse and open the pause menu. Resume to capture it again.
+
+### Character
+The player uses a procedural articulated character rig with separate upper/lower limbs, smooth capsule-based anatomy, head details, and gait animation.
