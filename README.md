@@ -17,12 +17,15 @@ Open the forwarded port 5173.
 - **Shift** — sprint on foot
 - **E** — enter the nearest vehicle
 - **F** — exit vehicle
-- **Mouse right-button drag** — orbit camera
-- **Escape** — pause
+- **Mouse look** — click the game to capture the mouse
+- **M** — open / close the full city map
+- **Escape** — close the map or pause
 
 ## Current systems
 
-- Procedurally assembled city grid with varied buildings, roads, sidewalks, trees, beach and water
+- Procedurally assembled city grid with detailed facade trim, storefronts, rooftops, roads, sidewalks, trees, beach and water
+- Building collision bounds for the player and player vehicle
+- Live rotating minimap and a full-screen city map with building footprints, roads, traffic and player heading
 - Third-person character controller
 - Drivable player vehicle with acceleration, braking, steering and speed HUD
 - Ambient AI traffic vehicles
