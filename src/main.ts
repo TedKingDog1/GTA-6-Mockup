@@ -21,7 +21,21 @@ const hemi = new THREE.HemisphereLight(0xc6e4ff, 0x405044, 2.0); scene.add(hemi)
 const sun = new THREE.DirectionalLight(0xffe0b2, 3.1); sun.position.set(-180, 260, 100); sun.castShadow = true; sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-240; sun.shadow.camera.right=240; sun.shadow.camera.top=240; sun.shadow.camera.bottom=-240; scene.add(sun);
 
 const mat = (color: number, roughness=0.86, metalness=0) => new THREE.MeshStandardMaterial({color, roughness, metalness});
-const groundMat=mat(0x657b58), roadMat=mat(0x292f32), sidewalkMat=mat(0xaaa99b), lineMat=mat(0xe6dfc2), waterMat=new THREE.MeshStandardMaterial({color:0x247d91,roughness:0.27,metalness:0.12});
+function noiseMap(base:string,spread:number,seedValue:number):THREE.CanvasTexture{
+ const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256;
+ const context=canvas.getContext('2d')!;context.fillStyle=base;context.fillRect(0,0,256,256);
+ const image=context.getImageData(0,0,256,256),data=image.data;let state=seedValue>>>0;
+ for(let i=0;i<data.length;i+=4){state=(state*1664525+1013904223)>>>0;const n=((state>>>24)/255-0.5)*spread;data[i]=Math.max(0,Math.min(255,data[i]+n));data[i+1]=Math.max(0,Math.min(255,data[i+1]+n));data[i+2]=Math.max(0,Math.min(255,data[i+2]+n));}
+ context.putImageData(image,0,0);
+ // Fine aggregate and subtle surface variation, generated locally without external assets.
+ for(let i=0;i<950;i++){state=(state*1664525+1013904223)>>>0;const x=state%256;state=(state*1664525+1013904223)>>>0;const y=state%256;context.fillStyle='rgba(12,16,14,0.10)';context.fillRect(x,y,1+(state%2),1);}
+ const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(3,3);texture.anisotropy=4;return texture;
+}
+const asphaltMap=noiseMap('#303638',42,17), concreteMap=noiseMap('#aaa99b',26,31), grassMap=noiseMap('#657b58',38,53);
+const groundMat=new THREE.MeshStandardMaterial({color:0xffffff,map:grassMap,roughness:1});
+const roadMat=new THREE.MeshStandardMaterial({color:0xffffff,map:asphaltMap,roughness:0.96});
+const sidewalkMat=new THREE.MeshStandardMaterial({color:0xffffff,map:concreteMap,roughness:0.94});
+const lineMat=mat(0xe6dfc2), waterMat=new THREE.MeshStandardMaterial({color:0x247d91,roughness:0.27,metalness:0.12});
 const boxGeo=new THREE.BoxGeometry(1,1,1);
 function box(x:number,y:number,z:number,sx:number,sy:number,sz:number,m:THREE.Material, parent:THREE.Object3D=scene) {
  const o=new THREE.Mesh(boxGeo,m); o.position.set(x,y,z); o.scale.set(sx,sy,sz); o.castShadow=sy>1.5; o.receiveShadow=true; parent.add(o); return o;
@@ -64,6 +78,13 @@ for(let gx=-5;gx<5;gx++) for(let gz=-5;gz<5;gz++){
    for(let wx=-1;wx<=1;wx++){
     const pane=box(x+wx*w*0.27,yy,z+d/2+0.012,w*0.17,1.35,0.035,windowMats[(buildingCount+f+wx+3)%3],world);
     pane.castShadow=false;
+   }
+   // A second window rhythm on the side wall breaks up the flat block silhouette.
+   const sidePane=box(x+w/2+0.012,yy,z,w*0.035,1.25,1.0,windowMats[(buildingCount+f+1)%3],world);
+   sidePane.castShadow=false;
+   if(f===0&&buildingCount%3===0){
+    const awning=box(x,1.15,z+d/2+0.12,w*0.9,0.18,0.42,mat(0x536d70),world);
+    awning.castShadow=true;
    }
   }
   if(h>35){box(x,h+1,z,w*0.35,1.5,d*0.35,mat(0x626d70),world); cylinder(x+2,h+3,z+1,0.65,3,mat(0x9ba4a0),world);}
