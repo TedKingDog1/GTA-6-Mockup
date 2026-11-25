@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import './style.css';
+import { createPlayerCharacter } from './character';
 
 type Mode = 'on-foot' | 'driving';
 const scene = new THREE.Scene();
@@ -85,13 +86,9 @@ for(let i=0;i<260;i++){
 // Beach and marina edge
 for(let i=0;i<28;i++){const x=-430+i*31; box(x,0.05,-425,28,0.12,55,mat(0xd7c79b),world);}
 for(let i=0;i<18;i++){const x=-360+i*38; box(x,0.6,-480,18,1.2,5,mat(0x73533b),world);}
-// Player
-const player=new THREE.Group(); scene.add(player);
-const skin=mat(0xb98261), shirt=mat(0x263f46), pants=mat(0x30353b), shoes=mat(0x15191b);
-const torso=box(0,1.65,0,0.75,0.95,0.42,shirt,player);
-const head=new THREE.Mesh(new THREE.SphereGeometry(0.25,12,10),skin);head.position.y=2.35;player.add(head);
-const legs:THREE.Mesh[]=[];
-for(const x of [-0.2,0.2]){legs.push(box(x,0.55,0,0.25,0.9,0.3,pants,player));box(x,0.12,0.08,0.27,0.2,0.4,shoes,player);}
+// Player: articulated procedural character with smooth anatomical volumes.
+const character=createPlayerCharacter();
+const player=character.root;scene.add(player);
 player.position.set(0,0,0);
 // Vehicle builder
 type Vehicle={root:THREE.Group;speed:number;yaw:number;ai:boolean;route:number;phase:number;paint:number};
@@ -122,7 +119,7 @@ const ui=document.createElement('div');ui.id='hud';ui.innerHTML=`
  <div class="top-right"><div class="clock" id="clock">10:42</div><div class="cash">$ 24,850</div><div class="wanted" id="wanted">☆☆☆☆☆</div></div>
  <div class="mission"><small>FREE ROAM</small><b id="objective">Explore the city</b><span>Find a vehicle. See where the road takes you.</span></div>
  <div class="minimap-wrap"><canvas id="minimap" width="180" height="180"></canvas><div class="map-label">VICE CITY</div></div>
- <div class="help" id="help"><b>WASD</b> Move <b>SHIFT</b> Sprint <b>E</b> Enter vehicle <b>ESC</b> Pause</div>
+ <div class="help" id="help"><b>CLICK</b> Lock mouse <b>WASD</b> Move / Drive <b>SHIFT</b> Sprint <b>E</b> Enter <b>F</b> Exit <b>ESC</b> Pause</div>
  <div class="speedometer" id="speedometer"><strong id="speed">000</strong><span>KM/H</span></div>
  <div class="toast" id="toast">Welcome to Vice City</div>
  <div class="pause hidden" id="pause"><div class="pause-card"><small>VICE CITY</small><h1>PAUSED</h1><p>Your city. Your rules.</p><button id="resume">RESUME GAME</button><div>WASD Move / Drive · E Enter · F Exit · Shift Sprint</div></div></div>`;
@@ -134,11 +131,19 @@ let mode:Mode='on-foot',activeCar:Vehicle|null=null,paused=false,dayTime=0.43,el
 const keys=new Set<string>();let yaw=0,mouseDown=false,lastX=0;
 addEventListener('keydown',e=>{keys.add(e.code);if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='Escape'){paused=!paused;$<HTMLDivElement>('pause').classList.toggle('hidden',!paused);}});
 addEventListener('keyup',e=>keys.delete(e.code));
-$('resume').addEventListener('click',()=>{paused=false;$<HTMLDivElement>('pause').classList.add('hidden');});
-renderer.domElement.addEventListener('mousedown',e=>{if(e.button===2){mouseDown=true;lastX=e.clientX;}});
-addEventListener('mouseup',()=>mouseDown=false);
-addEventListener('mousemove',e=>{if(mouseDown&&!paused){yaw-=(e.clientX-lastX)*0.004;lastX=e.clientX;}});
+$('resume').addEventListener('click',()=>{paused=false;$<HTMLDivElement>('pause').classList.add('hidden');renderer.domElement.requestPointerLock();});
+// Pointer lock gives the camera true FPS-style mouse look. Click the game to capture.
+renderer.domElement.addEventListener('click',()=>{
+ if(!paused&&document.pointerLockElement!==renderer.domElement) renderer.domElement.requestPointerLock();
+});
+addEventListener('mousemove',e=>{
+ if(document.pointerLockElement===renderer.domElement&&!paused) yaw-=e.movementX*0.0024;
+});
 renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('pointerlockchange',()=>{
+ const locked=document.pointerLockElement===renderer.domElement;
+ $('help').classList.toggle('mouse-locked',locked);
+});
 function enterCar(){
  let nearest:Vehicle|null=null,dist=5.4;
  for(const v of vehicles){if(v.ai)continue;const d=v.root.position.distanceTo(player.position);if(d<dist){dist=d;nearest=v;}}
@@ -159,10 +164,11 @@ function update(dt:number){
  if(keys.has('KeyF')){keys.delete('KeyF');if(mode==='driving')exitCar();}
  if(mode==='on-foot'){
   const forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0),side=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0);
-  const speed=keys.has('ShiftLeft')||keys.has('ShiftRight')?13:7;
+  const sprinting=keys.has('ShiftLeft')||keys.has('ShiftRight');
+  const speed=sprinting?13:7;
   const direction=new THREE.Vector3(side,0,-forward);if(direction.lengthSq()>0){direction.normalize().applyAxisAngle(new THREE.Vector3(0,1,0),yaw);player.position.addScaledVector(direction,speed*dt);player.rotation.y=Math.atan2(-direction.x,-direction.z);}
   player.position.x=THREE.MathUtils.clamp(player.position.x,-390,390);player.position.z=THREE.MathUtils.clamp(player.position.z,-410,410);
-  legs.forEach((leg,i)=>{leg.rotation.x=Math.sin(elapsed*10+i*Math.PI)*0.35*(direction.lengthSq()>0?1:0);});
+  character.update(elapsed,direction.lengthSq()>0,sprinting);
  }else if(activeCar){
   const throttle=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);
   const steering=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0);
