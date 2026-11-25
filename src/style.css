@@ -21,3 +21,16 @@
 .help.mouse-locked{opacity:.42;transform:translateY(3px)}
 canvas{outline:none;cursor:crosshair}
 .pause-card{border-radius:4px}
+
+/* Expanded interactive city map */
+.map-screen{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:rgba(5,12,11,.88);backdrop-filter:blur(10px);pointer-events:auto;padding:24px}
+.map-screen.hidden{display:none}
+.map-panel{width:min(900px,94vw);max-height:94vh;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;background:linear-gradient(145deg,#1b2924,#101816);border:1px solid #d3b16c77;box-shadow:0 24px 90px #000b;border-radius:5px}
+.map-heading{width:min(720px,100%);display:flex;align-items:center;justify-content:space-between}
+.map-heading small{font-size:9px;letter-spacing:4px;color:#d8b66b}.map-heading h2{font:800 30px 'Barlow Condensed';letter-spacing:3px;margin:0}
+.map-heading>span{font-size:9px;letter-spacing:1.5px;color:#aeb9ad}
+.map-panel #world-map{width:min(68vh, min(78vw,720px));height:auto;max-height:70vh;border:1px solid #c4c3a766;background:#263b35;image-rendering:auto;cursor:default}
+.map-legend{width:min(720px,100%);display:flex;justify-content:center;gap:22px;flex-wrap:wrap;color:#c7d0c4;font-size:9px;letter-spacing:1px}
+.map-legend span{display:flex;align-items:center;gap:6px}.map-legend i{display:inline-block;width:9px;height:9px;border-radius:50%}
+.legend-player{background:#f4e7a7}.legend-road{background:#89928a}.legend-building{background:#a7a58d}.legend-traffic{background:#e0a34c}
+@media(max-width:650px){.map-screen{padding:8px}.map-panel{padding:12px;gap:8px}.map-heading h2{font-size:24px}.map-heading>span{font-size:7px}.map-panel #world-map{width:min(88vw,68vh);max-height:76vh}.map-legend{gap:10px;font-size:8px}}
